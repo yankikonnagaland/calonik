@@ -437,7 +437,11 @@ export default function Index(): React.ReactElement {
 /** Styles */
 const styles = StyleSheet.create({
   container: { flex:1, backgroundColor: TOK.background },
-
+summaryGridAlt: {
+  marginTop: 6,
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
   card: {
     backgroundColor: TOK.card,
     borderRadius: 16,
