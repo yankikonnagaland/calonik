@@ -399,7 +399,23 @@ export default function Index(): React.ReactElement {
           </TouchableOpacity>
         </View>
       </Card>
+{/* === MID SUMMARY (boxes like Food Search) === */}
+<View style={[styles.sectionCard, { marginTop: 12 }]}>
+  <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
 
+  {/* 2×2 grid like Food Search tiles */}
+  <View style={styles.summaryGridAlt}>
+    <MacroTile title="Calories" value={`${consumed}`} colors={UI.blue} />
+    <MacroTile title="Protein"  value={`${totalProtein.toFixed(0)}g`} colors={UI.green} />
+    <MacroTile title="Carbs"    value={`${totalCarbs.toFixed(0)}g`} colors={UI.orange} />
+    <MacroTile title="Fats"     value={`${totalFat.toFixed(0)}g`} colors={UI.red} />
+  </View>
+
+  {/* Full-width Fiber tile (same style family) */}
+  <View style={{ marginTop: 6 }}>
+    <MacroTileFull title="Fiber" value={`${totalFiber.toFixed(0)}g`} colors={UI.blue} />
+  </View>
+</View>
       {/* Bottom Food items — now clearly bordered */}
       <Card style={[{ marginTop: 12, marginBottom: 24 }, styles.sectionCard]}>
         <Text style={styles.h6}>Food items — {selectedDate.toLocaleDateString()}</Text>
