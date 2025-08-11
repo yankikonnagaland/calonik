@@ -1,22 +1,21 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Pressable,
+  Alert,
 } from "react-native";
-import Svg, { Circle, Defs, Stop, LinearGradient as SvgGrad } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Svg, { Circle, Defs, LinearGradient as SvgGrad, Stop } from "react-native-svg";
 
-/** HSL -> rgba helper */
+/* ================== HSL → rgba helper (for Tailwind tokens) ================== */
 function hsl(h: number, s: number, l: number, a = 1): string {
   const _s = s / 100, _l = l / 100;
   const c = (1 - Math.abs(2 * _l - 1)) * _s;
@@ -35,59 +34,65 @@ function hsl(h: number, s: number, l: number, a = 1): string {
   return `rgba(${R},${G},${B},${a})`;
 }
 
-/** Tailwind dark tokens (your values) */
+/* ================== Tailwind dark tokens (exact) ================== */
 const TOK = {
-  background: hsl(222.2, 84, 4.9),
-  foreground: hsl(210, 40, 98),
-  card: hsl(222.2, 84, 4.9),
-  cardFg: hsl(210, 40, 98),
-  primary: hsl(210, 40, 98),
-  primaryFg: hsl(222.2, 47.4, 11.2),
-  secondary: hsl(217.2, 32.6, 17.5),
-  secondaryFg: hsl(210, 40, 98),
-  muted: hsl(217.2, 32.6, 17.5),
-  mutedFg: hsl(215, 20.2, 65.1),
-  accent: hsl(217.2, 32.6, 17.5),
-  accentFg: hsl(210, 40, 98),
+  background: hsl(222.2, 84, 4.9),      // --background
+  foreground: hsl(210, 40, 98),         // --foreground
+  card: hsl(222.2, 84, 4.9),            // --card
+  cardFg: hsl(210, 40, 98),             // --card-foreground
+  primary: hsl(210, 40, 98),            // --primary
+  primaryFg: hsl(222.2, 47.4, 11.2),    // --primary-foreground
+  secondary: hsl(217.2, 32.6, 17.5),    // --secondary
+  secondaryFg: hsl(210, 40, 98),        // --secondary-foreground
+  muted: hsl(217.2, 32.6, 17.5),        // --muted
+  mutedFg: hsl(215, 20.2, 65.1),        // --muted-foreground
+  accent: hsl(217.2, 32.6, 17.5),       // --accent
+  accentFg: hsl(210, 40, 98),           // --accent-foreground
   destructive: hsl(0, 62.8, 30.6),
   destructiveFg: hsl(210, 40, 98),
-  border: hsl(217.2, 32.6, 17.5),
-  input: hsl(217.2, 32.6, 17.5),
-  ring: hsl(212.7, 26.8, 83.9),
-  dateBtnBg: "#9333ea",
+  border: hsl(217.2, 32.6, 17.5),       // --border
+  input: hsl(217.2, 32.6, 17.5),        // --input
+  ring: hsl(212.7, 26.8, 83.9),         // --ring
+  // UI accents used on web:
+  dateBtnBg: "#9333ea",                 // purple chip
   dateBtnBorder: hsl(270, 83, 75),
-  headerGradA: "rgba(16,185,129,0.10)",
+  headerGradA: "rgba(16,185,129,0.10)", // subtle hero wash
   headerGradB: "rgba(59,130,246,0.10)",
-  donutA: "#10B981",
-  donutB: "#3B82F6",
-  donutC: "#8B5CF6",
-  mint: "#5eead4",
-  amber: "#fbbf24",
-  cyan: "#22d3ee",
-  violet: "#a78bfa",
+  donutA: "#10B981", donutB: "#3B82F6", donutC: "#8B5CF6",
+  // tile accent colors
+  mint: "#5eead4", amber: "#fbbf24", cyan: "#22d3ee", violet: "#a78bfa",
 };
 
-/** Types */
+/* ================== Types & helpers ================== */
 type Macros = { calories: number; protein: number; fat: number; carbs: number; fiber: number; grams: number };
 type Food = { id: string; name: string; base: Macros; units: string[]; unitToGrams?: Record<string, number> };
 
-/** Mock data */
 const CATALOG: Food[] = [
   { id: "roti", name: "Roti", base: { calories: 110, protein: 3, fat: 3, carbs: 18, fiber: 2, grams: 40 }, units: ["piece", "grams"], unitToGrams: { piece: 40 } },
   { id: "milk", name: "Milk (toned)", base: { calories: 60, protein: 3, fat: 3, carbs: 5, fiber: 0, grams: 100 }, units: ["ml", "cup", "grams"], unitToGrams: { cup: 240, ml: 1 } },
   { id: "chicken", name: "Chicken Breast (cooked)", base: { calories: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0, grams: 100 }, units: ["grams", "piece"], unitToGrams: { piece: 120 } },
 ];
+
 const searchFoods = (q: string) => (q.trim() ? CATALOG.filter(f => f.name.toLowerCase().includes(q.toLowerCase())) : []);
 const scaleMacros = (base: Macros, g: number) => {
   const k = g / (base.grams || 1);
   const r = (n: number) => Math.round(n * 10) / 10;
-  return { calories: Math.round(base.calories * k), protein: r(base.protein * k), fat: r(base.fat * k), carbs: r(base.carbs * k), fiber: r(base.fiber * k), grams: Math.round(g) };
+  return {
+    calories: Math.round(base.calories * k),
+    protein: r(base.protein * k),
+    fat: r(base.fat * k),
+    carbs: r(base.carbs * k),
+    fiber: r(base.fiber * k),
+    grams: Math.round(g),
+  };
 };
-const gramsFor = (qty: number, u: string, f: Food | null) => (!f ? 0 : u === "grams" || u === "g" || u === "ml" ? qty : (f.unitToGrams?.[u] ?? 1) * qty);
+const gramsFor = (qty: number, u: string, f: Food | null) =>
+  !f ? 0 : (u === "grams" || u === "g" || u === "ml") ? qty : (f.unitToGrams?.[u] ?? 1) * qty;
+
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
-/** Reusable Card */
+/* ================== Reusable shells ================== */
 const Card: React.FC<{ children: React.ReactNode; style?: any; title?: string; iconLeft?: React.ReactNode }> = ({ children, style, title, iconLeft }) => (
   <View style={[styles.card, style]}>
     {title && (
@@ -100,7 +105,7 @@ const Card: React.FC<{ children: React.ReactNode; style?: any; title?: string; i
   </View>
 );
 
-const SummaryTile = ({ label, value, accent }: { label: string; value: string; accent: string }) => (
+const SmallSummaryTile = ({ label, value, accent }: { label: string; value: string; accent: string }) => (
   <View style={styles.tile}>
     <View style={[styles.tileAccent, { backgroundColor: accent }]} />
     <Text style={styles.tileLabel}>{label}</Text>
@@ -108,7 +113,7 @@ const SummaryTile = ({ label, value, accent }: { label: string; value: string; a
   </View>
 );
 
-/** Custom dark Unit dropdown (modal) */
+/* ================== Custom dark Unit dropdown (modal) ================== */
 function UnitSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   const [open, setOpen] = useState(false);
   return (
@@ -139,13 +144,12 @@ function UnitSelect({ value, onChange, options }: { value: string; onChange: (v:
   );
 }
 
-/** Food Result Card */
+/* ================== Food Result Card (2×2 + Fiber full width) ================== */
 const UI = {
   inner: hsl(222, 84, 7),
   input: TOK.input,
   title: TOK.foreground,
   label: TOK.mutedFg,
-  outline: "#3755FF",
   tileBorder: "rgba(255,255,255,0.06)",
   blue: ["#0F2A66", "#0C1F4A"] as const,
   green: ["#0F3D2D", "#0B2C21"] as const,
@@ -154,60 +158,6 @@ const UI = {
   btnA: "#2575FC",
   btnB: "#20C997",
 } as const;
-
-type FoodResultProps = {
-  name: string;
-  units: string[];
-  unit: string;
-  setUnit: (v: string) => void;
-  qty: string;
-  setQty: (v: string) => void;
-  macros: { calories: number; protein: number; carbs: number; fat: number; fiber: number } | null;
-  onAdd: () => void;
-};
-
-const FoodResultCard = ({ name, units, unit, setUnit, qty, setQty, macros, onAdd }: FoodResultProps) => {
-  return (
-    <View style={frc.wrap}>
-      <Text style={frc.title}>{name}</Text>
-
-      <View style={frc.row}>
-        <View style={{ flex: 1, marginRight: 12 }}>
-          <Text style={frc.label}>Quantity</Text>
-          <TextInput
-            keyboardType="numeric"
-            value={qty}
-            onChangeText={setQty}
-            style={frc.input}
-            placeholder="1"
-            placeholderTextColor={UI.label}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={frc.label}>Unit</Text>
-          <UnitSelect value={unit} onChange={setUnit} options={units} />
-        </View>
-      </View>
-
-      <View style={frc.grid}>
-        <MacroTile title="Calories" value={macros ? `${macros.calories}` : "—"} colors={UI.blue} />
-        <MacroTile title="Protein"  value={macros ? `${macros.protein}g` : "—"} colors={UI.green} />
-        <MacroTile title="Carbs"    value={macros ? `${macros.carbs}g`   : "—"} colors={UI.orange} />
-        <MacroTile title="Fat"      value={macros ? `${macros.fat}g`     : "—"} colors={UI.red} />
-      </View>
-      <View style={{ marginTop: 6 }}>
-        <MacroTileFull title="Fiber" value={macros ? `${macros.fiber}g` : "—"} colors={UI.blue} />
-      </View>
-
-      <TouchableOpacity activeOpacity={0.9} onPress={onAdd} style={{ marginTop: 14 }}>
-        <LinearGradient colors={[UI.btnA, UI.btnB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={frc.addBtn}>
-          <Ionicons name="add" size={16} color="#fff" />
-          <Text style={frc.addText}>  Add {qty} {unit} to Meal</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </View>
-  );
-};
 
 const MacroTile = ({ title, value, colors }: { title: string; value: string; colors: readonly [string, string] }) => (
   <LinearGradient colors={colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={frc.tileHalf}>
@@ -222,7 +172,60 @@ const MacroTileFull = ({ title, value, colors }: { title: string; value: string;
   </LinearGradient>
 );
 
-/** Donut header */
+type FoodResultProps = {
+  name: string;
+  units: string[];
+  unit: string;
+  setUnit: (v: string) => void;
+  qty: string;
+  setQty: (v: string) => void;
+  macros: { calories: number; protein: number; carbs: number; fat: number; fiber: number } | null;
+  onAdd: () => void;
+};
+const FoodResultCard = ({ name, units, unit, setUnit, qty, setQty, macros, onAdd }: FoodResultProps) => (
+  <View style={frc.wrap}>
+    <Text style={frc.title}>{name}</Text>
+
+    {/* Quantity + Unit */}
+    <View style={frc.row}>
+      <View style={{ flex: 1, marginRight: 12 }}>
+        <Text style={frc.label}>Quantity</Text>
+        <TextInput
+          keyboardType="numeric"
+          value={qty}
+          onChangeText={setQty}
+          style={frc.input}
+          placeholder="1"
+          placeholderTextColor={UI.label}
+        />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={frc.label}>Unit</Text>
+        <UnitSelect value={unit} onChange={setUnit} options={units} />
+      </View>
+    </View>
+
+    {/* 2×2 grid + Fiber full width */}
+    <View style={frc.grid}>
+      <MacroTile title="Calories" value={macros ? `${macros.calories}` : "—"} colors={UI.blue} />
+      <MacroTile title="Protein"  value={macros ? `${macros.protein}g` : "—"} colors={UI.green} />
+      <MacroTile title="Carbs"    value={macros ? `${macros.carbs}g`   : "—"} colors={UI.orange} />
+      <MacroTile title="Fat"      value={macros ? `${macros.fat}g`     : "—"} colors={UI.red} />
+    </View>
+    <View style={{ marginTop: 6 }}>
+      <MacroTileFull title="Fiber" value={macros ? `${macros.fiber}g` : "—"} colors={UI.blue} />
+    </View>
+
+    <TouchableOpacity activeOpacity={0.9} onPress={onAdd} style={{ marginTop: 14 }}>
+      <LinearGradient colors={[UI.btnA, UI.btnB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={frc.addBtn}>
+        <Ionicons name="add" size={16} color="#fff" />
+        <Text style={frc.addText}>  Add {qty} {unit} to Meal</Text>
+      </LinearGradient>
+    </TouchableOpacity>
+  </View>
+);
+
+/* ================== Donut ================== */
 function CalorieDonut({ current, target }: { current: number; target: number }) {
   const pct = Math.min(100, (current / Math.max(target, 1)) * 100);
   const radius = 16;
@@ -254,19 +257,26 @@ function CalorieDonut({ current, target }: { current: number; target: number }) 
   );
 }
 
-/** Screen */
+/* ================== Screen ================== */
 export default function Index(): React.ReactElement {
+  // goals
   const [targetCalories, setTargetCalories] = useState(2000);
   const [caloriesOut, setCaloriesOut] = useState(0);
   const [weight] = useState(75.4);
 
+  // date & logs
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [foodLogs, setFoodLogs] = useState<Record<string, Array<{ name: string; grams: number; calories: number; protein: number; fat: number; carbs: number; fiber: number }>>>({});
   const dayKey = ymd(selectedDate);
   const dayFoods = foodLogs[dayKey] || [];
   const consumed = dayFoods.reduce((s, f) => s + (f.calories || 0), 0);
+  const totalProtein = dayFoods.reduce((s, f) => s + (f.protein || 0), 0);
+  const totalCarbs = dayFoods.reduce((s, f) => s + (f.carbs || 0), 0);
+  const totalFat = dayFoods.reduce((s, f) => s + (f.fat || 0), 0);
+  const totalFiber = dayFoods.reduce((s, f) => s + (f.fiber || 0), 0);
   const net = consumed - caloriesOut;
 
+  // search state
   const [query, setQuery] = useState("");
   const results = useMemo<Food[]>(() => searchFoods(query), [query]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
@@ -278,16 +288,25 @@ export default function Index(): React.ReactElement {
     if (!selectedFood || !scaled) return;
     setFoodLogs(prev => {
       const arr = prev[dayKey]?.slice() || [];
-      arr.push({ name: selectedFood.name, grams: scaled.grams, calories: scaled.calories, protein: scaled.protein, fat: scaled.fat, carbs: scaled.carbs, fiber: scaled.fiber });
+      arr.push({
+        name: selectedFood.name,
+        grams: scaled.grams,
+        calories: scaled.calories,
+        protein: scaled.protein,
+        fat: scaled.fat,
+        carbs: scaled.carbs,
+        fiber: scaled.fiber
+      });
       return { ...prev, [dayKey]: arr };
     });
-    // ✅ clear selection + search
+    // clear selection + search
     setSelectedFood(null);
     setQty("1");
     setUnit("grams");
-    setQuery("");              // << clear the search box
+    setQuery("");
   };
 
+  // camera mocks (hooked later to AI)
   const pickImage = async () => {
     const lib = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (lib.status !== "granted") { Alert.alert("Permission needed", "Allow Photos to pick an image."); return; }
@@ -303,7 +322,7 @@ export default function Index(): React.ReactElement {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
-      {/* Header card (kept subtle) */}
+      {/* Header (subtle gradient wash + donut + date chip) */}
       <View style={[styles.card, { padding: 14, backgroundColor: TOK.card, overflow: "hidden" }]}>
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
@@ -318,7 +337,7 @@ export default function Index(): React.ReactElement {
         </View>
       </View>
 
-      {/* Daily Goal (kept subtle) */}
+      {/* Daily Goal quick card */}
       <Card style={{ marginTop: 12 }}>
         <View style={styles.rowBetween}>
           <View>
@@ -332,7 +351,7 @@ export default function Index(): React.ReactElement {
         </View>
       </Card>
 
-      {/* Date section — now clearly bordered */}
+      {/* Date section — clearly bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]}>
         <View style={styles.rowBetween}>
           <TouchableOpacity onPress={()=>setSelectedDate(addDays(selectedDate,-1))} style={styles.iconBtn}><Text style={styles.iconTxt}>◀</Text></TouchableOpacity>
@@ -344,7 +363,7 @@ export default function Index(): React.ReactElement {
         </View>
       </Card>
 
-      {/* Food Search — now clearly bordered */}
+      {/* Food Search — clearly bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]} title="Food Search" iconLeft={<Ionicons name="search" size={16} color={TOK.mutedFg} />}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={TOK.mutedFg} />
@@ -353,20 +372,18 @@ export default function Index(): React.ReactElement {
         </View>
 
         {results.length>0 && (
-          <FlatList
-            horizontal
-            data={results}
-            keyExtractor={(i)=>i.id}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingVertical:8 }}
-            ItemSeparatorComponent={()=> <View style={{ width:8 }} />}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={()=>{ setSelectedFood(item); setUnit(item.units[0]||"grams"); setQty("1"); }} style={styles.result}>
+          <View style={{ paddingVertical:8, flexDirection:"row" }}>
+            {results.map(item => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={()=>{ setSelectedFood(item); setUnit(item.units[0]||"grams"); setQty("1"); }}
+                style={styles.result}
+              >
                 <Text style={styles.resultTitle}>{item.name}</Text>
                 <Text style={styles.muted}>{item.base.calories} kcal / {item.base.grams}g</Text>
               </TouchableOpacity>
-            )}
-          />
+            ))}
+          </View>
         )}
 
         {selectedFood && (
@@ -385,7 +402,21 @@ export default function Index(): React.ReactElement {
         )}
       </Card>
 
-      {/* AI Food Camera — now clearly bordered */}
+      {/* === MID SUMMARY (boxes like Food Search) — above Food Items === */}
+      <View style={[styles.sectionCard, { marginTop: 12 }]}>
+        <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
+        <View style={styles.summaryGridAlt}>
+          <MacroTile title="Calories" value={`${consumed}`} colors={UI.blue} />
+          <MacroTile title="Protein"  value={`${totalProtein.toFixed(0)}g`} colors={UI.green} />
+          <MacroTile title="Carbs"    value={`${totalCarbs.toFixed(0)}g`} colors={UI.orange} />
+          <MacroTile title="Fats"     value={`${totalFat.toFixed(0)}g`} colors={UI.red} />
+        </View>
+        <View style={{ marginTop: 6 }}>
+          <MacroTileFull title="Fiber" value={`${totalFiber.toFixed(0)}g`} colors={UI.blue} />
+        </View>
+      </View>
+
+      {/* AI Food Camera — clearly bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]} title="AI Food Camera" iconLeft={<MaterialCommunityIcons name="camera-outline" size={18} color={TOK.mutedFg} />}>
         <Text style={styles.muted}>Snap or upload a photo to identify items & macros.</Text>
         <View style={{ flexDirection:"row" }}>
@@ -399,24 +430,19 @@ export default function Index(): React.ReactElement {
           </TouchableOpacity>
         </View>
       </Card>
-{/* === MID SUMMARY (boxes like Food Search) === */}
-<View style={[styles.sectionCard, { marginTop: 12 }]}>
-  <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
 
-  {/* 2×2 grid like Food Search tiles */}
-  <View style={styles.summaryGridAlt}>
-    <MacroTile title="Calories" value={`${consumed}`} colors={UI.blue} />
-    <MacroTile title="Protein"  value={`${totalProtein.toFixed(0)}g`} colors={UI.green} />
-    <MacroTile title="Carbs"    value={`${totalCarbs.toFixed(0)}g`} colors={UI.orange} />
-    <MacroTile title="Fats"     value={`${totalFat.toFixed(0)}g`} colors={UI.red} />
-  </View>
+      {/* Top small summary set (chips style) */}
+      <Card style={{ marginTop: 12 }}>
+        <Text style={styles.h6}>Today's Nutrition Summary</Text>
+        <View style={styles.tileRow}>
+          <SmallSummaryTile label="Calories In"  value={`${consumed} cal`} accent={TOK.mint} />
+          <SmallSummaryTile label="Calories Out" value={`${caloriesOut} cal`} accent={TOK.amber} />
+          <SmallSummaryTile label="Net Calories" value={`${net} cal`} accent={TOK.cyan} />
+          <SmallSummaryTile label="Weight"       value={`${weight.toFixed(1)} kg`} accent={TOK.violet} />
+        </View>
+      </Card>
 
-  {/* Full-width Fiber tile (same style family) */}
-  <View style={{ marginTop: 6 }}>
-    <MacroTileFull title="Fiber" value={`${totalFiber.toFixed(0)}g`} colors={UI.blue} />
-  </View>
-</View>
-      {/* Bottom Food items — now clearly bordered */}
+      {/* Food items list — clearly bordered */}
       <Card style={[{ marginTop: 12, marginBottom: 24 }, styles.sectionCard]}>
         <Text style={styles.h6}>Food items — {selectedDate.toLocaleDateString()}</Text>
         {dayFoods.length===0 ? (
@@ -430,18 +456,35 @@ export default function Index(): React.ReactElement {
           ))
         )}
       </Card>
+
+      {/* Bottom: Boxed summary */}
+      <View style={[styles.sectionCard, { marginTop: 0, marginBottom: 24, padding: 14, borderRadius: 16 }]}>
+        <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
+        <View style={styles.summaryGrid}>
+          <BottomSummaryTile label="Calories" value={`${consumed} cal`} />
+          <BottomSummaryTile label="Carbs" value={`${totalCarbs.toFixed(0)}g`} />
+          <BottomSummaryTile label="Protein" value={`${totalProtein.toFixed(0)}g`} />
+          <BottomSummaryTile label="Fats" value={`${totalFat.toFixed(0)}g`} />
+          <BottomSummaryTile label="Fiber" value={`${totalFiber.toFixed(0)}g`} />
+          <BottomSummaryTile label="Weight" value={`${weight.toFixed(1)} kg`} />
+        </View>
+      </View>
     </ScrollView>
   );
 }
 
-/** Styles */
+/* ================== Bottom summary tile (boxed) ================== */
+const BottomSummaryTile = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.bottomSummaryTile}>
+    <Text style={styles.bottomSummaryValue}>{value}</Text>
+    <Text style={styles.bottomSummaryLabel}>{label}</Text>
+  </View>
+);
+
+/* ================== Styles ================== */
 const styles = StyleSheet.create({
   container: { flex:1, backgroundColor: TOK.background },
-summaryGridAlt: {
-  marginTop: 6,
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
+
   card: {
     backgroundColor: TOK.card,
     borderRadius: 16,
@@ -450,10 +493,13 @@ summaryGridAlt: {
     padding: 14,
   },
 
-  /** ✅ Stronger border for “section” cards you called out */
+  // strong border for sections
   sectionCard: {
     borderColor: TOK.ring,
     borderWidth: 1,
+    backgroundColor: TOK.card,
+    borderRadius: 16,
+    padding: 12,
   },
 
   // text
@@ -461,10 +507,13 @@ summaryGridAlt: {
   muted: { color: TOK.mutedFg, fontSize: 12 },
   h6: { color: TOK.foreground, fontWeight: "700", fontSize: 16 },
   h4: { color: TOK.foreground, fontWeight: "800", fontSize: 20 },
+  sectionTitle: { color: TOK.foreground, fontSize: 16, fontWeight: "700", marginBottom: 10 },
 
+  // layout helpers
   rowCenter: { flexDirection:"row", alignItems:"center", marginBottom:6 },
   rowBetween: { flexDirection:"row", alignItems:"center", justifyContent:"space-between" },
 
+  // date button
   dateBtn: {
     flexDirection:"row", alignItems:"center",
     backgroundColor: TOK.dateBtnBg,
@@ -474,6 +523,7 @@ summaryGridAlt: {
   },
   dateBtnText: { color:"#fff", fontWeight:"700", fontSize: 12 },
 
+  // inputs
   input: {
     backgroundColor: TOK.input,
     color: TOK.foreground,
@@ -491,13 +541,15 @@ summaryGridAlt: {
   },
   searchInput: { flex:1, color: TOK.foreground, fontSize:14 },
 
+  // results chip
   result: {
     backgroundColor: hsl(222.2, 32, 10),
     borderWidth: StyleSheet.hairlineWidth, borderColor: TOK.border,
-    borderRadius:10, padding:12, minWidth:160
+    borderRadius:10, padding:12, minWidth:160, marginRight:8
   },
   resultTitle: { color: TOK.foreground, fontWeight:"700" },
 
+  // small controls
   chip: {
     backgroundColor:TOK.secondary, borderColor:TOK.border, borderWidth:StyleSheet.hairlineWidth,
     paddingHorizontal:10, paddingVertical:6, borderRadius:10
@@ -509,6 +561,7 @@ summaryGridAlt: {
   },
   iconTxt: { color:TOK.foreground, fontWeight:"700" },
 
+  // top small summary chips
   tileRow: { flexDirection:"row", flexWrap:"wrap", marginTop:10 },
   tile: {
     flexGrow:1, flexBasis:"45%", backgroundColor:TOK.secondary,
@@ -519,22 +572,46 @@ summaryGridAlt: {
   tileLabel: { color:TOK.mutedFg, fontSize:12 },
   tileValue: { color:TOK.foreground, fontSize:20, fontWeight:"800" },
 
+  // food list rows
   foodRow: { flexDirection:"row", justifyContent:"space-between", paddingVertical:8 },
 
+  // buttons
   btn: { borderRadius:12, overflow:"hidden" },
   btnBg: { ...StyleSheet.absoluteFillObject, opacity:0.25 },
   btnContent: { paddingVertical:10, paddingHorizontal:14, flexDirection:"row", alignItems:"center", justifyContent:"center" },
   btnText: { color:"#fff", fontWeight:"700" },
+
+  // bottom boxed summary
+  summaryGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  bottomSummaryTile: {
+    width: "48%",
+    backgroundColor: "#0E1421",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    padding: 12,
+    marginBottom: 10,
+  },
+  bottomSummaryValue: { color: "#ffffff", fontWeight: "800", fontSize: 18 },
+  bottomSummaryLabel: { color: "rgba(231,233,238,0.75)", marginTop: 2, fontSize: 12 },
+
+  // mid summary grid (same wrap/spacing as search tiles)
+  summaryGridAlt: {
+    marginTop: 6,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
 });
 
-/** Food Result Card styles */
+/* ================== Food Result Card styles ================== */
 const frc = StyleSheet.create({
   wrap: {
     borderRadius: 16,
     padding: 14,
     backgroundColor: UI.inner,
     borderWidth: 1,
-    borderColor: TOK.ring, // stronger outline to match “section” look
+    borderColor: TOK.ring,
   },
   title: { color: UI.title, fontWeight: "800", fontSize: 18, marginBottom: 6 },
   row: { flexDirection: "row", marginTop: 6 },
@@ -551,6 +628,7 @@ const frc = StyleSheet.create({
     fontSize: 16,
   },
 
+  // custom select
   selectBox: {
     height: 52,
     borderRadius: 12,
@@ -588,6 +666,7 @@ const frc = StyleSheet.create({
   addBtn: { paddingVertical: 12, borderRadius: 12, alignItems: "center", flexDirection: "row", justifyContent: "center" },
   addText: { color: "#fff", fontWeight: "700" },
 
+  // modal
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", padding: 24 },
   modalSheet: { backgroundColor: TOK.background, borderRadius: 16, borderWidth: 1, borderColor: TOK.border, paddingVertical: 10 },
   modalTitle: { color: TOK.mutedFg, fontWeight: "700", fontSize: 14, paddingHorizontal: 14, paddingBottom: 6, opacity: 0.9 },
