@@ -403,18 +403,24 @@ export default function Index(): React.ReactElement {
       </Card>
 
       {/* === MID SUMMARY (boxes like Food Search) — above Food Items === */}
-      <View style={[styles.sectionCard, { marginTop: 12 }]}>
-        <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
-        <View style={styles.summaryGridAlt}>
-          <MacroTile title="Calories" value={`${consumed}`} colors={UI.blue} />
-          <MacroTile title="Protein"  value={`${totalProtein.toFixed(0)}g`} colors={UI.green} />
-          <MacroTile title="Carbs"    value={`${totalCarbs.toFixed(0)}g`} colors={UI.orange} />
-          <MacroTile title="Fats"     value={`${totalFat.toFixed(0)}g`} colors={UI.red} />
-        </View>
-        <View style={{ marginTop: 6 }}>
-          <MacroTileFull title="Fiber" value={`${totalFiber.toFixed(0)}g`} colors={UI.blue} />
-        </View>
-      </View>
+     {selectedFood && scaled && (
+  <View style={[styles.sectionCard, { marginTop: 12 }]}> 
+    <Text style={styles.sectionTitle}>Selected Food Summary</Text>
+
+    {/* 2×2 grid like Food Search tiles */}
+    <View style={styles.summaryGridAlt}>
+      <MacroTile title="Calories" value={`${scaled.calories}`} colors={UI.blue} />
+      <MacroTile title="Protein"  value={`${scaled.protein}g`} colors={UI.green} />
+      <MacroTile title="Carbs"    value={`${scaled.carbs}g`} colors={UI.orange} />
+      <MacroTile title="Fats"     value={`${scaled.fat}g`} colors={UI.red} />
+    </View>
+
+    {/* Full-width Fiber tile */}
+    <View style={{ marginTop: 6 }}>
+      <MacroTileFull title="Fiber" value={`${scaled.fiber}g`} colors={UI.blue} />
+    </View>
+  </View>
+)}
 
       {/* AI Food Camera — clearly bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]} title="AI Food Camera" iconLeft={<MaterialCommunityIcons name="camera-outline" size={18} color={TOK.mutedFg} />}>
