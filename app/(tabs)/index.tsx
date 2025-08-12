@@ -36,31 +36,34 @@ function hsl(h: number, s: number, l: number, a = 1): string {
 
 /* ================== Tailwind dark tokens (exact) ================== */
 const TOK = {
-  background: hsl(222.2, 84, 4.9),      // --background
-  foreground: hsl(210, 40, 98),         // --foreground
-  card: hsl(222.2, 84, 4.9),            // --card
-  cardFg: hsl(210, 40, 98),             // --card-foreground
-  primary: hsl(210, 40, 98),            // --primary
-  primaryFg: hsl(222.2, 47.4, 11.2),    // --primary-foreground
-  secondary: hsl(217.2, 32.6, 17.5),    // --secondary
-  secondaryFg: hsl(210, 40, 98),        // --secondary-foreground
-  muted: hsl(217.2, 32.6, 17.5),        // --muted
-  mutedFg: hsl(215, 20.2, 65.1),        // --muted-foreground
-  accent: hsl(217.2, 32.6, 17.5),       // --accent
-  accentFg: hsl(210, 40, 98),           // --accent-foreground
+  background: hsl(222.2, 84, 4.9),
+  foreground: hsl(210, 40, 98),
+  card: hsl(222.2, 84, 4.9),
+  cardFg: hsl(210, 40, 98),
+  primary: hsl(210, 40, 98),
+  primaryFg: hsl(222.2, 47.4, 11.2),
+  secondary: hsl(217.2, 32.6, 17.5),
+  secondaryFg: hsl(210, 40, 98),
+  muted: hsl(217.2, 32.6, 17.5),
+  mutedFg: hsl(215, 20.2, 65.1),
+  accent: hsl(217.2, 32.6, 17.5),
+  accentFg: hsl(210, 40, 98),
   destructive: hsl(0, 62.8, 30.6),
   destructiveFg: hsl(210, 40, 98),
-  border: hsl(217.2, 32.6, 17.5),       // --border
-  input: hsl(217.2, 32.6, 17.5),        // --input
-  ring: hsl(212.7, 26.8, 83.9),         // --ring
-  // UI accents used on web:
-  dateBtnBg: "#9333ea",                 // purple chip
+  border: hsl(217.2, 32.6, 17.5),
+  input: hsl(217.2, 32.6, 17.5),
+  ring: hsl(212.7, 26.8, 83.9),
+  dateBtnBg: "#9333ea",
   dateBtnBorder: hsl(270, 83, 75),
-  headerGradA: "rgba(16,185,129,0.10)", // subtle hero wash
+  headerGradA: "rgba(16,185,129,0.10)",
   headerGradB: "rgba(59,130,246,0.10)",
-  donutA: "#10B981", donutB: "#3B82F6", donutC: "#8B5CF6",
-  // tile accent colors
-  mint: "#5eead4", amber: "#fbbf24", cyan: "#22d3ee", violet: "#a78bfa",
+  donutA: "#10B981",
+  donutB: "#3B82F6",
+  donutC: "#8B5CF6",
+  mint: "#5eead4",
+  amber: "#fbbf24",
+  cyan: "#22d3ee",
+  violet: "#a78bfa",
 };
 
 /* ================== Types & helpers ================== */
@@ -89,7 +92,6 @@ const scaleMacros = (base: Macros, g: number) => {
 const gramsFor = (qty: number, u: string, f: Food | null) =>
   !f ? 0 : (u === "grams" || u === "g" || u === "ml") ? qty : (f.unitToGrams?.[u] ?? 1) * qty;
 
-const ymd = (d: Date) => d.toISOString().slice(0, 10);
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
 /* ================== Reusable shells ================== */
@@ -267,8 +269,7 @@ export default function Index(): React.ReactElement {
   // date & logs
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [foodLogs, setFoodLogs] = useState<Record<string, Array<{ name: string; grams: number; calories: number; protein: number; fat: number; carbs: number; fiber: number }>>>({});
-  const dayKey = ymd(selectedDate);
-  const dayFoods = foodLogs[dayKey] || [];
+  const dayFoods = foodLogs[selectedDate.toDateString()] || [];
   const consumed = dayFoods.reduce((s, f) => s + (f.calories || 0), 0);
   const totalProtein = dayFoods.reduce((s, f) => s + (f.protein || 0), 0);
   const totalCarbs = dayFoods.reduce((s, f) => s + (f.carbs || 0), 0);
@@ -287,7 +288,8 @@ export default function Index(): React.ReactElement {
   const addToToday = () => {
     if (!selectedFood || !scaled) return;
     setFoodLogs(prev => {
-      const arr = prev[dayKey]?.slice() || [];
+      const key = selectedDate.toDateString();
+      const arr = prev[key]?.slice() || [];
       arr.push({
         name: selectedFood.name,
         grams: scaled.grams,
@@ -297,7 +299,7 @@ export default function Index(): React.ReactElement {
         carbs: scaled.carbs,
         fiber: scaled.fiber
       });
-      return { ...prev, [dayKey]: arr };
+      return { ...prev, [key]: arr };
     });
     // clear selection + search
     setSelectedFood(null);
@@ -322,7 +324,7 @@ export default function Index(): React.ReactElement {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
-      {/* Header (subtle gradient wash + donut + date chip) */}
+      {/* Header */}
       <View style={[styles.card, { padding: 14, backgroundColor: TOK.card, overflow: "hidden" }]}>
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
@@ -337,7 +339,7 @@ export default function Index(): React.ReactElement {
         </View>
       </View>
 
-      {/* Daily Goal quick card */}
+      {/* Daily Goal */}
       <Card style={{ marginTop: 12 }}>
         <View style={styles.rowBetween}>
           <View>
@@ -351,7 +353,7 @@ export default function Index(): React.ReactElement {
         </View>
       </Card>
 
-      {/* Date section — clearly bordered */}
+      {/* Date section — bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]}>
         <View style={styles.rowBetween}>
           <TouchableOpacity onPress={()=>setSelectedDate(addDays(selectedDate,-1))} style={styles.iconBtn}><Text style={styles.iconTxt}>◀</Text></TouchableOpacity>
@@ -363,7 +365,7 @@ export default function Index(): React.ReactElement {
         </View>
       </Card>
 
-      {/* Food Search — clearly bordered */}
+      {/* Food Search — bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]} title="Food Search" iconLeft={<Ionicons name="search" size={16} color={TOK.mutedFg} />}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={TOK.mutedFg} />
@@ -402,27 +404,23 @@ export default function Index(): React.ReactElement {
         )}
       </Card>
 
-      {/* === MID SUMMARY (boxes like Food Search) — above Food Items === */}
-     {selectedFood && scaled && (
-  <View style={[styles.sectionCard, { marginTop: 12 }]}> 
-    <Text style={styles.sectionTitle}>Selected Food Summary</Text>
+      {/* === CONDITIONAL MID SUMMARY (shows only when a food is selected) === */}
+      {selectedFood && scaled && (
+        <View style={[styles.sectionCard, { marginTop: 12 }]}>
+          <Text style={styles.sectionTitle}>Selected Food Summary</Text>
+          <View style={styles.summaryGridAlt}>
+            <MacroTile title="Calories" value={`${scaled.calories}`} colors={UI.blue} />
+            <MacroTile title="Protein"  value={`${scaled.protein}g`} colors={UI.green} />
+            <MacroTile title="Carbs"    value={`${scaled.carbs}g`} colors={UI.orange} />
+            <MacroTile title="Fats"     value={`${scaled.fat}g`} colors={UI.red} />
+          </View>
+          <View style={{ marginTop: 6 }}>
+            <MacroTileFull title="Fiber" value={`${scaled.fiber}g`} colors={UI.blue} />
+          </View>
+        </View>
+      )}
 
-    {/* 2×2 grid like Food Search tiles */}
-    <View style={styles.summaryGridAlt}>
-      <MacroTile title="Calories" value={`${scaled.calories}`} colors={UI.blue} />
-      <MacroTile title="Protein"  value={`${scaled.protein}g`} colors={UI.green} />
-      <MacroTile title="Carbs"    value={`${scaled.carbs}g`} colors={UI.orange} />
-      <MacroTile title="Fats"     value={`${scaled.fat}g`} colors={UI.red} />
-    </View>
-
-    {/* Full-width Fiber tile */}
-    <View style={{ marginTop: 6 }}>
-      <MacroTileFull title="Fiber" value={`${scaled.fiber}g`} colors={UI.blue} />
-    </View>
-  </View>
-)}
-
-      {/* AI Food Camera — clearly bordered */}
+      {/* AI Food Camera — bordered */}
       <Card style={[{ marginTop: 12 }, styles.sectionCard]} title="AI Food Camera" iconLeft={<MaterialCommunityIcons name="camera-outline" size={18} color={TOK.mutedFg} />}>
         <Text style={styles.muted}>Snap or upload a photo to identify items & macros.</Text>
         <View style={{ flexDirection:"row" }}>
@@ -448,7 +446,7 @@ export default function Index(): React.ReactElement {
         </View>
       </Card>
 
-      {/* Food items list — clearly bordered */}
+      {/* Food items list — bordered */}
       <Card style={[{ marginTop: 12, marginBottom: 24 }, styles.sectionCard]}>
         <Text style={styles.h6}>Food items — {selectedDate.toLocaleDateString()}</Text>
         {dayFoods.length===0 ? (
@@ -462,30 +460,9 @@ export default function Index(): React.ReactElement {
           ))
         )}
       </Card>
-
-      {/* Bottom: Boxed summary */}
-      <View style={[styles.sectionCard, { marginTop: 0, marginBottom: 24, padding: 14, borderRadius: 16 }]}>
-        <Text style={styles.sectionTitle}>Today's Nutrition Summary</Text>
-        <View style={styles.summaryGrid}>
-          <BottomSummaryTile label="Calories" value={`${consumed} cal`} />
-          <BottomSummaryTile label="Carbs" value={`${totalCarbs.toFixed(0)}g`} />
-          <BottomSummaryTile label="Protein" value={`${totalProtein.toFixed(0)}g`} />
-          <BottomSummaryTile label="Fats" value={`${totalFat.toFixed(0)}g`} />
-          <BottomSummaryTile label="Fiber" value={`${totalFiber.toFixed(0)}g`} />
-          <BottomSummaryTile label="Weight" value={`${weight.toFixed(1)} kg`} />
-        </View>
-      </View>
     </ScrollView>
   );
 }
-
-/* ================== Bottom summary tile (boxed) ================== */
-const BottomSummaryTile = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.bottomSummaryTile}>
-    <Text style={styles.bottomSummaryValue}>{value}</Text>
-    <Text style={styles.bottomSummaryLabel}>{label}</Text>
-  </View>
-);
 
 /* ================== Styles ================== */
 const styles = StyleSheet.create({
@@ -499,7 +476,6 @@ const styles = StyleSheet.create({
     padding: 14,
   },
 
-  // strong border for sections
   sectionCard: {
     borderColor: TOK.ring,
     borderWidth: 1,
@@ -508,18 +484,15 @@ const styles = StyleSheet.create({
     padding: 12,
   },
 
-  // text
   text: { color: TOK.foreground },
   muted: { color: TOK.mutedFg, fontSize: 12 },
   h6: { color: TOK.foreground, fontWeight: "700", fontSize: 16 },
   h4: { color: TOK.foreground, fontWeight: "800", fontSize: 20 },
   sectionTitle: { color: TOK.foreground, fontSize: 16, fontWeight: "700", marginBottom: 10 },
 
-  // layout helpers
   rowCenter: { flexDirection:"row", alignItems:"center", marginBottom:6 },
   rowBetween: { flexDirection:"row", alignItems:"center", justifyContent:"space-between" },
 
-  // date button
   dateBtn: {
     flexDirection:"row", alignItems:"center",
     backgroundColor: TOK.dateBtnBg,
@@ -529,7 +502,6 @@ const styles = StyleSheet.create({
   },
   dateBtnText: { color:"#fff", fontWeight:"700", fontSize: 12 },
 
-  // inputs
   input: {
     backgroundColor: TOK.input,
     color: TOK.foreground,
@@ -547,7 +519,6 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex:1, color: TOK.foreground, fontSize:14 },
 
-  // results chip
   result: {
     backgroundColor: hsl(222.2, 32, 10),
     borderWidth: StyleSheet.hairlineWidth, borderColor: TOK.border,
@@ -555,7 +526,6 @@ const styles = StyleSheet.create({
   },
   resultTitle: { color: TOK.foreground, fontWeight:"700" },
 
-  // small controls
   chip: {
     backgroundColor:TOK.secondary, borderColor:TOK.border, borderWidth:StyleSheet.hairlineWidth,
     paddingHorizontal:10, paddingVertical:6, borderRadius:10
@@ -567,7 +537,6 @@ const styles = StyleSheet.create({
   },
   iconTxt: { color:TOK.foreground, fontWeight:"700" },
 
-  // top small summary chips
   tileRow: { flexDirection:"row", flexWrap:"wrap", marginTop:10 },
   tile: {
     flexGrow:1, flexBasis:"45%", backgroundColor:TOK.secondary,
@@ -578,30 +547,13 @@ const styles = StyleSheet.create({
   tileLabel: { color:TOK.mutedFg, fontSize:12 },
   tileValue: { color:TOK.foreground, fontSize:20, fontWeight:"800" },
 
-  // food list rows
   foodRow: { flexDirection:"row", justifyContent:"space-between", paddingVertical:8 },
 
-  // buttons
   btn: { borderRadius:12, overflow:"hidden" },
   btnBg: { ...StyleSheet.absoluteFillObject, opacity:0.25 },
   btnContent: { paddingVertical:10, paddingHorizontal:14, flexDirection:"row", alignItems:"center", justifyContent:"center" },
   btnText: { color:"#fff", fontWeight:"700" },
 
-  // bottom boxed summary
-  summaryGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  bottomSummaryTile: {
-    width: "48%",
-    backgroundColor: "#0E1421",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-    padding: 12,
-    marginBottom: 10,
-  },
-  bottomSummaryValue: { color: "#ffffff", fontWeight: "800", fontSize: 18 },
-  bottomSummaryLabel: { color: "rgba(231,233,238,0.75)", marginTop: 2, fontSize: 12 },
-
-  // mid summary grid (same wrap/spacing as search tiles)
   summaryGridAlt: {
     marginTop: 6,
     flexDirection: "row",
@@ -634,7 +586,6 @@ const frc = StyleSheet.create({
     fontSize: 16,
   },
 
-  // custom select
   selectBox: {
     height: 52,
     borderRadius: 12,
@@ -672,7 +623,6 @@ const frc = StyleSheet.create({
   addBtn: { paddingVertical: 12, borderRadius: 12, alignItems: "center", flexDirection: "row", justifyContent: "center" },
   addText: { color: "#fff", fontWeight: "700" },
 
-  // modal
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", padding: 24 },
   modalSheet: { backgroundColor: TOK.background, borderRadius: 16, borderWidth: 1, borderColor: TOK.border, paddingVertical: 10 },
   modalTitle: { color: TOK.mutedFg, fontWeight: "700", fontSize: 14, paddingHorizontal: 14, paddingBottom: 6, opacity: 0.9 },
