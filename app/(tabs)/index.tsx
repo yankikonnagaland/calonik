@@ -328,8 +328,8 @@ export default function Index(): React.ReactElement {
       <View style={[styles.card, { padding: 14, backgroundColor: TOK.card, overflow: "hidden" }]}>
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
-          <Text style={[styles.h6, { fontSize: 18 }]}>Food Tracker</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Text style={[styles.h6, { fontSize: 16 }]}>Food Tracker</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8}}>
             <CalorieDonut current={consumed} target={targetCalories} />
             <TouchableOpacity onPress={()=>{}} style={styles.dateBtn} activeOpacity={0.9}>
               <Ionicons name="calendar" size={14} color="#fff" />
@@ -347,8 +347,7 @@ export default function Index(): React.ReactElement {
             <Text style={styles.h4}>{consumed} / {targetCalories} cal</Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
-            <Text style={styles.muted}>Target</Text>
-            <TextInput keyboardType="numeric" value={String(targetCalories)} onChangeText={(t)=>setTargetCalories(Number(t||0))} style={styles.input} placeholder="2000" placeholderTextColor={TOK.mutedFg}/>
+           
           </View>
         </View>
       </Card>
@@ -426,7 +425,7 @@ export default function Index(): React.ReactElement {
 
       {/* AI Food Camera — bordered (TALLER + SPACED TEXT) */}
       <Card
-        style={[{ marginTop: 12 }, styles.sectionCard, styles.tallCard]}
+        style={[{ marginTop: 14 }, styles.sectionCard, styles.tallCard]}
         title="AI Food Camera"
         iconLeft={<MaterialCommunityIcons name="camera-outline" size={18} color={TOK.mutedFg} />}
       >
@@ -434,13 +433,13 @@ export default function Index(): React.ReactElement {
           Snap or upload a photo to identify items & macros.
         </Text>
         <View style={styles.btnRow}>
-          <TouchableOpacity onPress={openCamera} style={[styles.btn, { marginRight: 10 }]}>
+          <TouchableOpacity onPress={openCamera} style={[styles.btn, { marginRight: 22 }]}>
             <LinearGradient colors={["#6ea8ff", "#3a6df0"] as const} start={{ x:0, y:0 }} end={{ x:1, y:1 }} style={styles.btnBg} />
-            <View style={styles.btnContent}><Ionicons name="camera" size={16} color="#fff"/><Text style={styles.btnText}> Open Camera</Text></View>
+            <View style={styles.btnContent}><Ionicons name="camera" size={18} color="#fff"/><Text style={styles.btnText}> Open Camera</Text></View>
           </TouchableOpacity>
           <TouchableOpacity onPress={pickImage} style={styles.btn}>
             <LinearGradient colors={["#8b5cf6", TOK.violet] as const} start={{ x:0, y:0 }} end={{ x:1, y:1 }} style={styles.btnBg} />
-            <View style={styles.btnContent}><Ionicons name="image" size={16} color="#fff"/><Text style={styles.btnText}> Upload Photo</Text></View>
+            <View style={styles.btnContent}><Ionicons name="image" size={18} color="#fff"/><Text style={styles.btnText}> Upload Photo</Text></View>
           </TouchableOpacity>
         </View>
       </Card>
@@ -496,15 +495,15 @@ const styles = StyleSheet.create({
 
   /* --- Taller cards + better spacing --- */
   tallCard: {
-    padding: 18,      // more inner padding than the default 16
-    minHeight: 200,   // ensures card feels substantial
+    padding: 17,      // more inner padding than the default 16
+    minHeight: 150,   // ensures card feels substantial
   },
   helpText: {
     color: TOK.mutedFg,
     fontSize: 12,
     lineHeight: 18,
     marginTop: 6,
-    marginBottom: 14, // clear space before buttons
+    marginBottom: 10, // clear space before buttons
   },
   btnRow: {
     flexDirection: "row",
@@ -514,8 +513,8 @@ const styles = StyleSheet.create({
 
   text: { color: TOK.foreground },
   muted: { color: TOK.mutedFg, fontSize: 12 },
-  h6: { color: TOK.foreground, fontWeight: "700", fontSize: 20 },
-  h4: { color: TOK.foreground, fontWeight: "800", fontSize: 26 },
+  h6: { color: TOK.foreground, fontWeight: "700", fontSize: 18 },
+  h4: { color: TOK.foreground, fontWeight: "800", fontSize: 22 },
   sectionTitle: { color: TOK.foreground, fontSize: 16, fontWeight: "700", marginBottom: 10 },
 
   rowCenter: { flexDirection:"row", alignItems:"center", marginBottom:6 },
@@ -536,7 +535,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10,
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth, borderColor: TOK.border,
-    minWidth: 90,
+    minWidth: 70,
   },
   searchBar: {
     flexDirection:"row", alignItems:"center",
@@ -580,7 +579,7 @@ const styles = StyleSheet.create({
 
   btn: { borderRadius:12, overflow:"hidden" },
   btnBg: { ...StyleSheet.absoluteFillObject, opacity:0.25 },
-  btnContent: { paddingVertical:14, paddingHorizontal:18, flexDirection:"row", alignItems:"center", justifyContent:"center" },
+  btnContent: { paddingVertical:15, paddingHorizontal:13, flexDirection:"row", alignItems:"center", justifyContent:"center" },
   btnText: { color:"#fff", fontWeight:"800", fontSize:16 },
 
   summaryGridAlt: {
