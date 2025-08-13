@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker"; // eslint-disable-line import/no-unresolved
 import Svg, { Circle, Defs, Stop, LinearGradient as SvgGrad } from "react-native-svg";
 
 /* ================== HSL → rgba helper (for Tailwind tokens) ================== */
@@ -234,26 +235,20 @@ function CalorieDonut({ current, target }: { current: number; target: number }) 
   const c = 2 * Math.PI * radius;
   const dashOffset = c - (pct / 100) * c;
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-      <View style={{ width: 48, height: 48 }}>
-        <Svg width="100%" height="100%" viewBox="0 0 40 40" style={{ transform: [{ rotate: "-90deg" }] }}>
-          <Defs>
-            <SvgGrad id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor={TOK.donutA} />
-              <Stop offset="50%" stopColor={TOK.donutB} />
-              <Stop offset="100%" stopColor={TOK.donutC} />
-            </SvgGrad>
-          </Defs>
-          <Circle cx="20" cy="20" r={radius} stroke="rgba(255,255,255,0.15)" strokeWidth="3" fill="none" />
-          <Circle cx="20" cy="20" r={radius} stroke="url(#grad)" strokeWidth="3" fill="none" strokeDasharray={c} strokeDashoffset={dashOffset} strokeLinecap="round" />
-        </Svg>
-        <View style={{ position: "absolute", inset: 0, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "700" }}>{Math.round(pct)}%</Text>
-        </View>
-      </View>
-      <View style={{ gap: 2 }}>
-        <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "600" }}>Goal</Text>
-        <Text style={{ color: TOK.foreground, fontSize: 12, fontWeight: "700" }}>{Math.round(current)}/{target}</Text>
+    <View style={{ width: 48, height: 48 }}>
+      <Svg width="100%" height="100%" viewBox="0 0 40 40" style={{ transform: [{ rotate: "-90deg" }] }}>
+        <Defs>
+          <SvgGrad id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <Stop offset="0%" stopColor={TOK.donutA} />
+            <Stop offset="50%" stopColor={TOK.donutB} />
+            <Stop offset="100%" stopColor={TOK.donutC} />
+          </SvgGrad>
+        </Defs>
+        <Circle cx="20" cy="20" r={radius} stroke="rgba(255,255,255,0.15)" strokeWidth="3" fill="none" />
+        <Circle cx="20" cy="20" r={radius} stroke="url(#grad)" strokeWidth="3" fill="none" strokeDasharray={c} strokeDashoffset={dashOffset} strokeLinecap="round" />
+      </Svg>
+      <View style={{ position: "absolute", inset: 0, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "700" }}>{Math.round(pct)}%</Text>
       </View>
     </View>
   );
@@ -268,6 +263,7 @@ export default function Index(): React.ReactElement {
 
   // date & logs
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [foodLogs, setFoodLogs] = useState<Record<string, Array<{ name: string; grams: number; calories: number; protein: number; fat: number; carbs: number; fiber: number }>>>({});
   const dayFoods = foodLogs[selectedDate.toDateString()] || [];
   const consumed = dayFoods.reduce((s, f) => s + (f.calories || 0), 0);
@@ -329,28 +325,36 @@ export default function Index(): React.ReactElement {
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
           <Text style={[styles.h6, { fontSize: 16 }]}>Food Tracker</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8}}>
-            <CalorieDonut current={consumed} target={targetCalories} />
-            <TouchableOpacity onPress={()=>{}} style={styles.dateBtn} activeOpacity={0.9}>
-              <Ionicons name="calendar" size={14} color="#fff" />
-              <Text style={styles.dateBtnText}> {selectedDate.toLocaleDateString(undefined,{ month:"short", day:"numeric" })}</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
 
       {/* Daily Goal */}
       <Card style={{ marginTop: 12 }}>
-        <View style={styles.rowBetween}>
-          <View>
-            <Text style={styles.h6}>Daily Goal</Text>
-            <Text style={styles.h4}>{consumed} / {targetCalories} cal</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <CalorieDonut current={consumed} target={targetCalories} />
+            <View style={{ gap: 2 }}>
+              <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "600" }}>Goal</Text>
+              <Text style={{ color: TOK.foreground, fontSize: 12, fontWeight: "700" }}>{Math.round(consumed)}/{targetCalories}</Text>
+            </View>
           </View>
-          <View style={{ alignItems: "flex-end" }}>
-           
-          </View>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateBtn} activeOpacity={0.9}>
+            <Ionicons name="calendar" size={14} color="#fff" />
+            <Text style={styles.dateBtnText}> {selectedDate.toLocaleDateString(undefined,{ month:"short", day:"numeric" })}</Text>
+          </TouchableOpacity>
         </View>
       </Card>
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={(_, d) => {
+            setShowDatePicker(false);
+            if (d) setSelectedDate(d);
+          }}
+        />
+      )}
 
       {/* Date section — bordered */}
       <Card style={[styles.sectionCard, { marginTop: 20, borderColor: TOK.mint }]}>
