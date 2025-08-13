@@ -323,9 +323,9 @@ export default function Index(): React.ReactElement {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingTop: 32 }}>
       {/* Header */}
-      <View style={[styles.card, { padding: 14, backgroundColor: TOK.card, overflow: "hidden" }]}>
+      <View style={[styles.card, { padding: 14, backgroundColor: TOK.card, overflow: "hidden", marginTop: 25, }]}>
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
           <Text style={[styles.h6, { fontSize: 16 }]}>Food Tracker</Text>
@@ -446,7 +446,7 @@ export default function Index(): React.ReactElement {
 
       {/* Top small summary set (chips style) */}
       <Card style={{ marginTop: 12 }}>
-        <Text style={styles.h6}>Today's Nutrition Summary</Text>
+        <Text style={styles.h6}>Today&apos;s Nutrition Summary</Text>
         <View style={styles.tileRow}>
           <SmallSummaryTile label="Calories In"  value={`${consumed} cal`} accent={TOK.mint} />
           <SmallSummaryTile label="Calories Out" value={`${caloriesOut} cal`} accent={TOK.amber} />
