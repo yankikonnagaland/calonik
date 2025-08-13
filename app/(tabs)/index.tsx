@@ -234,26 +234,20 @@ function CalorieDonut({ current, target }: { current: number; target: number }) 
   const c = 2 * Math.PI * radius;
   const dashOffset = c - (pct / 100) * c;
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-      <View style={{ width: 48, height: 48 }}>
-        <Svg width="100%" height="100%" viewBox="0 0 40 40" style={{ transform: [{ rotate: "-90deg" }] }}>
-          <Defs>
-            <SvgGrad id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor={TOK.donutA} />
-              <Stop offset="50%" stopColor={TOK.donutB} />
-              <Stop offset="100%" stopColor={TOK.donutC} />
-            </SvgGrad>
-          </Defs>
-          <Circle cx="20" cy="20" r={radius} stroke="rgba(255,255,255,0.15)" strokeWidth="3" fill="none" />
-          <Circle cx="20" cy="20" r={radius} stroke="url(#grad)" strokeWidth="3" fill="none" strokeDasharray={c} strokeDashoffset={dashOffset} strokeLinecap="round" />
-        </Svg>
-        <View style={{ position: "absolute", inset: 0, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "700" }}>{Math.round(pct)}%</Text>
-        </View>
-      </View>
-      <View style={{ gap: 2 }}>
-        <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "600" }}>Goal</Text>
-        <Text style={{ color: TOK.foreground, fontSize: 12, fontWeight: "700" }}>{Math.round(current)}/{target}</Text>
+    <View style={{ width: 48, height: 48 }}>
+      <Svg width="100%" height="100%" viewBox="0 0 40 40" style={{ transform: [{ rotate: "-90deg" }] }}>
+        <Defs>
+          <SvgGrad id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <Stop offset="0%" stopColor={TOK.donutA} />
+            <Stop offset="50%" stopColor={TOK.donutB} />
+            <Stop offset="100%" stopColor={TOK.donutC} />
+          </SvgGrad>
+        </Defs>
+        <Circle cx="20" cy="20" r={radius} stroke="rgba(255,255,255,0.15)" strokeWidth="3" fill="none" />
+        <Circle cx="20" cy="20" r={radius} stroke="url(#grad)" strokeWidth="3" fill="none" strokeDasharray={c} strokeDashoffset={dashOffset} strokeLinecap="round" />
+      </Svg>
+      <View style={{ position: "absolute", inset: 0, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "700" }}>{Math.round(pct)}%</Text>
       </View>
     </View>
   );
@@ -329,8 +323,7 @@ export default function Index(): React.ReactElement {
         <LinearGradient colors={[TOK.headerGradA, TOK.headerGradB] as const} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={[styles.rowBetween, { alignItems: "center" }]}>
           <Text style={[styles.h6, { fontSize: 16 }]}>Food Tracker</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8}}>
-            <CalorieDonut current={consumed} target={targetCalories} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <TouchableOpacity onPress={()=>{}} style={styles.dateBtn} activeOpacity={0.9}>
               <Ionicons name="calendar" size={14} color="#fff" />
               <Text style={styles.dateBtnText}> {selectedDate.toLocaleDateString(undefined,{ month:"short", day:"numeric" })}</Text>
@@ -341,13 +334,11 @@ export default function Index(): React.ReactElement {
 
       {/* Daily Goal */}
       <Card style={{ marginTop: 12 }}>
-        <View style={styles.rowBetween}>
-          <View>
-            <Text style={styles.h6}>Daily Goal</Text>
-            <Text style={styles.h4}>{consumed} / {targetCalories} cal</Text>
-          </View>
-          <View style={{ alignItems: "flex-end" }}>
-           
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <CalorieDonut current={consumed} target={targetCalories} />
+          <View style={{ gap: 2 }}>
+            <Text style={{ color: TOK.mutedFg, fontSize: 11, fontWeight: "600" }}>Goal</Text>
+            <Text style={{ color: TOK.foreground, fontSize: 12, fontWeight: "700" }}>{Math.round(consumed)}/{targetCalories}</Text>
           </View>
         </View>
       </Card>
