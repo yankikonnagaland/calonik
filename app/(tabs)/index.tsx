@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: TOK.border,
-    padding: 16,
+    padding: 14,
   },
 
   sectionCard: {
@@ -491,13 +491,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     backgroundColor: TOK.card,
     borderRadius: 20,
-    padding: 16,
+    padding: 13,
   },
 
   /* --- Taller cards + better spacing --- */
   tallCard: {
-    padding: 22,      // more inner padding than the default 16
-    minHeight: 260,   // ensures card feels substantial
+    padding: 18,      // more inner padding than the default 16
+    minHeight: 200,   // ensures card feels substantial
   },
   helpText: {
     color: TOK.mutedFg,
@@ -514,8 +514,8 @@ const styles = StyleSheet.create({
 
   text: { color: TOK.foreground },
   muted: { color: TOK.mutedFg, fontSize: 12 },
-  h6: { color: TOK.foreground, fontWeight: "800", fontSize: 22 },
-  h4: { color: TOK.foreground, fontWeight: "900", fontSize: 28 },
+  h6: { color: TOK.foreground, fontWeight: "700", fontSize: 20 },
+  h4: { color: TOK.foreground, fontWeight: "800", fontSize: 26 },
   sectionTitle: { color: TOK.foreground, fontSize: 16, fontWeight: "700", marginBottom: 10 },
 
   rowCenter: { flexDirection:"row", alignItems:"center", marginBottom:6 },
@@ -526,9 +526,9 @@ const styles = StyleSheet.create({
     backgroundColor: TOK.dateBtnBg,
     borderColor: TOK.dateBtnBorder,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10,
+    paddingHorizontal: 8, paddingVertical: 7, borderRadius: 10,
   },
-  dateBtnText: { color:"#fff", fontWeight:"800", fontSize: 14 },
+  dateBtnText: { color:"#fff", fontWeight:"800", fontSize: 12 },
 
   input: {
     backgroundColor: TOK.input,
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     backgroundColor: TOK.input,
     borderRadius: 14,
     borderWidth: 1, borderColor: TOK.border,
-    paddingHorizontal:14, height: 56, marginTop:10,
+    paddingHorizontal:14, height: 48, marginTop:8,
   },
   searchInput: { flex:1, color: TOK.foreground, fontSize:14 },
 
