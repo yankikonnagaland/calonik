@@ -353,7 +353,7 @@ export default function Index(): React.ReactElement {
       </Card>
 
       {/* Date section — bordered */}
-      <Card style={[{ marginTop: 12 }, styles.sectionCard]}>
+      <Card style={[styles.sectionCard, { marginTop: 20, borderColor: TOK.mint }]}>
         <View style={styles.rowBetween}>
           <TouchableOpacity onPress={()=>setSelectedDate(addDays(selectedDate,-1))} style={styles.iconBtn}><Text style={styles.iconTxt}>◀</Text></TouchableOpacity>
           <Text style={styles.h6}>{selectedDate.toLocaleDateString(undefined,{ weekday:"short", month:"short", day:"numeric" })}</Text>
@@ -366,7 +366,7 @@ export default function Index(): React.ReactElement {
 
       {/* Food Search — bordered (TALLER) */}
       <Card
-        style={[{ marginTop: 12 }, styles.sectionCard, styles.tallCard]}
+        style={[styles.sectionCard, styles.tallCard, { marginTop: 20, borderColor: TOK.amber }]}
         title="Food Search"
         iconLeft={<Ionicons name="search" size={16} color={TOK.mutedFg} />}
       >
@@ -425,7 +425,7 @@ export default function Index(): React.ReactElement {
 
       {/* AI Food Camera — bordered (TALLER + SPACED TEXT) */}
       <Card
-        style={[{ marginTop: 14 }, styles.sectionCard, styles.tallCard]}
+        style={[styles.sectionCard, styles.tallCard, { marginTop: 20, borderColor: TOK.cyan }]}
         title="AI Food Camera"
         iconLeft={<MaterialCommunityIcons name="camera-outline" size={18} color={TOK.mutedFg} />}
       >
